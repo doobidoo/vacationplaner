@@ -22,7 +22,7 @@ VacationPlaner is a Python-based tool that helps you manage and visualize holida
 ### src/VacationPlaner.py
 The main Python script that handles the calendar generation and visualization.
 
-Important: to establish the dependencies first run:
+Important: establish the dependencies first
 ```
     pip install -r requirements.txt
 ```
@@ -128,5 +128,4 @@ To modify the ICS file:
 
 - The tool is configured for Swiss holidays in Thurgau, but can be adapted for other regions
 - All events are set as all-day events
-- Weekend days are automatically detected and marked
-- The ICS file includes proper status indicators for calendar applications
+- Weekend days are automatically

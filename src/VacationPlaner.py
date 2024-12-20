@@ -6,7 +6,7 @@ from datetime import date, datetime, timedelta
 from icalendar import Calendar, Event
 import json
 import glob
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 print("Current Working Directory:", os.getcwd())
 class VacationPlaner:
@@ -37,22 +37,27 @@ class VacationPlaner:
         print("Colors:", self.colors)
         print("Year:", self.year)
 
+
     def load_holiday_config(self, region: str = None, year: str = None) -> Dict:
         print("load_holiday_config===========================================")
-        #self.check()
-
-        """Load holiday configuration file"""
+        
+        # Find both JSON and iCal files
         holiday_files = glob.glob(os.path.join(self.conf_path, "holidays-*.json"))
+        holiday_files.extend(glob.glob(os.path.join(self.conf_path, "*.ics")))
+        
         if not holiday_files:
             print("No holiday configuration files found!")
             return None
         
         # If region and year are provided, try to find exact match
         if region and year:
-            exact_match = f"holidays-{region.lower()}-{year}.json"
-            if exact_match in holiday_files:
-                with open(exact_match, 'r') as f:
-                    return json.load(f)
+            json_match = f"holidays-{region.lower()}-{year}.json"
+            ical_match = f"holidays-{region.lower()}-{year}.ics"
+            
+            if json_match in holiday_files:
+                return self._load_json_file(json_match)
+            elif ical_match in holiday_files:
+                return self._load_ical_file(ical_match)
         
         print("\nAvailable holiday configuration files:")
         for i, file in enumerate(holiday_files, 1):
@@ -62,12 +67,64 @@ class VacationPlaner:
             try:
                 choice = int(input("\nSelect a holiday configuration file (enter number): ")) - 1
                 if 0 <= choice < len(holiday_files):
-                    with open(holiday_files[choice], 'r') as f:
-                        return json.load(f)
+                    selected_file = holiday_files[choice]
+                    if selected_file.endswith('.json'):
+                        return self._load_json_file(selected_file)
+                    elif selected_file.endswith('.ics'):
+                        return self._load_ical_file(selected_file)
                 else:
                     print("Invalid selection. Please try again.")
             except ValueError:
                 print("Please enter a valid number.")
+
+    def _load_json_file(self, filepath: str) -> Dict:
+        """Load and parse JSON holiday file"""
+        with open(filepath, 'r') as f:
+            return json.load(f)
+
+    def _load_ical_file(self, filepath: str) -> Dict:
+        """Load and parse iCal holiday file and convert to the same format as JSON"""
+        # Initialize holidays_config if it doesn't exist
+        if self.holidays_config is None:
+            self.holidays_config = {}
+            
+        # Extract region from filename
+        filename = os.path.basename(filepath)
+        name_parts = filename.replace('holidays-', '').replace('.ics', '').split('-')
+        region = name_parts[0].upper()
+        self.holidays_config['region'] = region
+        
+        with open(filepath, 'r') as f:
+            cal = Calendar.from_ical(f.read())
+            
+            holidays_list = []  # Changed to list instead of dict
+            years = set()
+            
+            for component in cal.walk():
+                if component.name == "VEVENT":
+                    date = component.get('dtstart').dt
+                    if isinstance(date, datetime):
+                        date = date.date()
+                    
+                    years.add(date.year)
+                    
+                    name = str(component.get('summary'))
+                    date_str = date.strftime('%Y-%m-%d')
+                    
+                    # Add holiday as dictionary to list
+                    holidays_list.append({
+                        "date": date_str,
+                        "description": name
+                    })
+            
+            # Set the year in the config (convert to integer)
+            if years:
+                self.holidays_config['year'] = min(years)  # Remove str() conversion
+                
+            # Store the holidays list in the config
+            self.holidays_config['holidays'] = holidays_list
+            
+            return self.holidays_config
 
     def load_vacation_config(self) -> Dict:
         """Load vacation configuration file"""
