@@ -22,6 +22,11 @@ VacationPlaner is a Python-based tool that helps you manage and visualize holida
 ### src/VacationPlaner.py
 The main Python script that handles the calendar generation and visualization.
 
+Important: to establish the dependencies first run:
+```
+    pip install -r requirements.txt
+```
+
 ### conf/holidays-RegionName-YYYY.json
 Configuration file for public holidays. Structure:
 ```json
@@ -105,9 +110,9 @@ To modify the ICS file:
 
 ## Output Files
 
-- `ferien_YEAR_FIRSTNAME_LASTNAME.png`: Visual calendar overview
-- `ferien_YEAR_FIRSTNAME_LASTNAME.pdf`: PDF version of the calendar
-- `ferien_YEAR_FIRSTNAME_LASTNAME.ics`: Calendar file for import
+- `vacation_YEAR_FIRSTNAME_LASTNAME.png`: Visual calendar overview
+- `vacation_YEAR_FIRSTNAME_LASTNAME.pdf`: PDF version of the calendar
+- `vacation_YEAR_FIRSTNAME_LASTNAME.ics`: Calendar file for import
 
 ## Dependencies
 
