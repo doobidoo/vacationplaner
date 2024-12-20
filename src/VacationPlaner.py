@@ -73,7 +73,7 @@ class VacationPlaner:
         """Load vacation configuration file"""
         print("load_vacation_config===========================================")
         #self.check()
-        config_files = glob.glob(os.path.join(self.conf_path, "vacation-*.json"))
+        config_files = glob.glob(os.path.join(self.conf_path, "vacation-planer*.json"))
         print(config_files)
         
         if not config_files:
@@ -148,7 +148,7 @@ class VacationPlaner:
         months = range(1, 13)
         fig, axes = plt.subplots(4, 3, figsize=(11.7, 8.3))
         fig.suptitle(
-            f"vacationplan {self.year} - {self.config['region']}\n"
+            f"Vacationplan {self.year} - {self.config['region']}\n"
             f"{self.config['firstName']} {self.config['lastName']}",
             fontsize=14, y=0.98
         )

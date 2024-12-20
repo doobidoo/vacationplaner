@@ -1,6 +1,6 @@
-# HolidayPlaner
+# VacationPlaner
 
-HolidayPlaner is a Python-based tool that helps you manage and visualize holidays and vacation days. It generates both a visual calendar representation and an ICS file that can be imported into various calendar applications.
+VacationPlaner is a Python-based tool that helps you manage and visualize holidays and vacation days. It generates both a visual calendar representation and an ICS file that can be imported into various calendar applications.
 
 ## Features
 
@@ -19,10 +19,10 @@ HolidayPlaner is a Python-based tool that helps you manage and visualize holiday
 
 ## File Structure
 
-### HolidayPlaner.py
+### src/VacationPlaner.py
 The main Python script that handles the calendar generation and visualization.
 
-### holidays-Region-2025.json
+### conf/holidays-RegionName-YYYY.json
 Configuration file for public holidays. Structure:
 ```json
 {
@@ -44,7 +44,7 @@ To modify holidays:
 3. Provide a description for each holiday
 4. Make sure the year matches the configuration
 
-### holidays-Region-2025-Firstname_Lastname.json
+### conf/vacation-planer-Firstname_Lastname.json
 Configuration file for personal vacation days. Structure:
 ```json
 {
@@ -94,7 +94,7 @@ To modify the ICS file:
 ## Usage
 
 1. Configure your holidays in a JSON file following the structure of holidays-thurgau-2025.json
-2. Run HolidayPlaner.py:
+2. Run VacationPlaner.py:
    ```bash
    python VacationPlaner.py
    ```
