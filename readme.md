@@ -128,4 +128,5 @@ To modify the ICS file:
 
 - The tool is configured for Swiss holidays in Thurgau, but can be adapted for other regions
 - All events are set as all-day events
-- Weekend days are automatically
+- Weekend days are automatically detected and marked
+- The ICS file includes proper status indicators for calendar applications
