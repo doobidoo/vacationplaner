@@ -1,0 +1,18 @@
+{
+    "firstName": "John",
+    "lastName": "Doe",
+    "year": 2025,
+    "region": "Kanton Thurgau",
+    "vacationBlocks": [
+        {
+            "description": "Neujahrsblock",
+            "start": "2025-01-02",
+            "end": "2025-01-03"
+        },
+        {
+            "description": "Osterblock",
+            "start": "2025-04-14",
+            "end": "2025-04-17"
+        }
+    ]
+}
