@@ -17,6 +17,9 @@ VacationPlaner is a Python-based tool that helps you manage and visualize holida
   - Weekends: Light blue (#C1D4FF)
   - Workdays: White (#FFFFFF)
 
+Sample:
+![grafik](https://github.com/user-attachments/assets/38d59b3e-a868-476d-aaf3-d7da13c69774)
+
 ## File Structure
 
 ### src/VacationPlaner.py
