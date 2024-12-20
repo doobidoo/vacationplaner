@@ -292,4 +292,48 @@ class VacationPlaner:
                         event = Event()
                         
                         # Set as whole day event
-                        event.add('dtstart', current_date, parameters={'VALUE': 'DA
+                        event.add('dtstart', current_date, parameters={'VALUE': 'DATE'})
+                        event.add('dtend', current_date + timedelta(days=1), parameters={'VALUE': 'DATE'})
+                        
+                        # Add common properties
+                        event.add('transp', 'TRANSPARENT')
+                        event.add('x-microsoft-cdo-busystatus', 'OOF')
+                        event.add('x-microsoft-cdo-alldayevent', 'TRUE')
+                        event.add('organizer', f"{self.config['firstName']} {self.config['lastName']}")
+                        
+                        if current_date in self.holidays:
+                            holiday_desc = self.get_holiday_description(current_date)
+                            event.add('summary', f"{holiday_desc} - {self.config['firstName']} {self.config['lastName']}")
+                            event.add('description', f"{holiday_desc} - Out of Office - {self.config['firstName']} {self.config['lastName']}")
+                            event.add('status', 'CONFIRMED')
+                            event.add('class', 'PUBLIC')
+                        elif self.is_vacation(current_date):
+                            event.add('summary', f"Vacation - {self.config['firstName']} {self.config['lastName']}")
+                            event.add('description', f"Personal Vacation - Out of Office - {self.config['firstName']} {self.config['lastName' ]}")
+                            event.add('status', 'CONFIRMED')
+                            event.add('class', 'PRIVATE')
+                        elif current_date.weekday() >= 5:
+                            event.add('summary', f"Weekend - {self.config['firstName' ]} {self.config['lastName']}")
+                            event.add('description', f"Weekend - Out of Office - {self.config['firstName' ]} {self.config['lastName' ]}")
+                            event.add('status', 'CONFIRMED')
+                            event.add('class', 'PUBLIC')
+                        else:
+                            continue
+
+                        # Add to calendar
+                        cal.add_component(event)
+
+        with open(filename, 'wb') as f:
+            f.write(cal.to_ical())
+
+def main():
+    
+    planer = VacationPlaner()
+    planer.initialize()
+    # Create ICS file
+    planer.create_ics()
+    # Create visualization
+    planer.create_calendar_visualization() # Call the method on the instance
+
+if __name__ == "__main__":
+    main()
