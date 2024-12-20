@@ -22,7 +22,7 @@ HolidayPlaner is a Python-based tool that helps you manage and visualize holiday
 ### HolidayPlaner.py
 The main Python script that handles the calendar generation and visualization.
 
-### holidays-thurgau-2025.json
+### holidays-Region-2025.json
 Configuration file for public holidays. Structure:
 ```json
 {
@@ -44,7 +44,39 @@ To modify holidays:
 3. Provide a description for each holiday
 4. Make sure the year matches the configuration
 
-### ferien_2025_John_Doe.ics
+### holidays-Region-2025-Firstname_Lastname.json
+Configuration file for personal vacation days. Structure:
+```json
+{
+    "firstName": "John",
+    "lastName": "Doe",
+    "year": 2025,
+    "region": "Region Name",
+    "vacationBlocks": [
+        {
+            "description": "Neujahrsblock",
+            "start": "2025-01-02",
+            "end": "2025-01-03"
+        },
+        {
+            "description": "Osterblock",
+            "start": "2025-04-14",
+            "end": "2025-04-17"
+        },
+        // ... more vacation blocks ...
+    ]
+}
+```
+To modify holidays:
+1. Follow the existing JSON structure
+2. Use the format "YYYY-MM-DD" for dates
+3. Provide a description for each vacation block
+4. Make sure the year matches the configuration
+5. Make sure the region matches the configuration
+6. Make sure the first and last name match the configuration
+
+
+### ferien_2025_Firstname_Lastname.ics
 The generated ICS calendar file. Contains:
 - Public holidays
 - Personal vacation days
@@ -89,7 +121,7 @@ To modify the ICS file:
 
 ## Notes
 
-- The tool is configured for Swiss holidays but can be adapted for other regions
+- The tool is configured for Swiss holidays in Thurgau, but can be adapted for other regions
 - All events are set as all-day events
 - Weekend days are automatically detected and marked
 - The ICS file includes proper status indicators for calendar applications
