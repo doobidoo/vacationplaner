@@ -49,6 +49,17 @@ To modify holidays:
 3. Provide a description for each holiday
 4. Make sure the year matches the configuration
 
+### conf/ferien_region_*.ics
+Alternatively, you may use existing .ics files with the public holidays and school vacations
+
+### Comparison between the rgions of vaction and holiday config files
+
+The comparison will be flexible while still catching completely mismatched regions. 
+- "Kanton Thurgau" will match with "THURGAU"
+- "DE" will match with "Deutschland"
+- "USA" will match with "United States"
+etc.
+
 ### conf/vacation-planer-Firstname_Lastname.json
 Configuration file for personal vacation days. Structure:
 ```json
@@ -80,8 +91,7 @@ To modify holidays:
 5. Make sure the region matches the configuration
 6. Make sure the first and last name match the configuration
 
-
-### ferien_2025_Firstname_Lastname.ics
+### vacation_2025_Firstname_Lastname.ics
 The generated ICS calendar file. Contains:
 - Public holidays
 - Personal vacation days

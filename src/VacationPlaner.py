@@ -39,7 +39,6 @@ class VacationPlaner:
 
 
     def load_holiday_config(self, region: str = None, year: str = None) -> Dict:
-        print("load_holiday_config===========================================")
         
         # Find both JSON and iCal files
         holiday_files = glob.glob(os.path.join(self.conf_path, "holidays-*.json"))
@@ -90,8 +89,7 @@ class VacationPlaner:
             
         # Extract region from filename
         filename = os.path.basename(filepath)
-        name_parts = filename.replace('holidays-', '').replace('.ics', '').split('-')
-        region = name_parts[0].upper()
+        region = filename.replace('.ics', '')
         self.holidays_config['region'] = region
         
         with open(filepath, 'r') as f:
@@ -128,7 +126,6 @@ class VacationPlaner:
 
     def load_vacation_config(self) -> Dict:
         """Load vacation configuration file"""
-        print("load_vacation_config===========================================")
         #self.check()
         config_files = glob.glob(os.path.join(self.conf_path, "vacation-planer*.json"))
         print(config_files)
@@ -176,7 +173,13 @@ class VacationPlaner:
         # Validate matching years and regions
         if self.config['year'] != self.holidays_config['year']:
             print("Warning: Year mismatch between vacation and holiday configs!")
-        if self.config['region'] != self.holidays_config['region']:
+
+        # Convert both regions to lowercase for case-insensitive comparison
+        config_region = self.config['region'].lower()
+        holiday_region = self.holidays_config['region'].lower()
+
+        # Check if either region is a substring of the other
+        if holiday_region not in config_region and config_region not in holiday_region:
             print("Warning: Region mismatch between vacation and holiday configs!")
 
         # Set class variables
@@ -289,48 +292,4 @@ class VacationPlaner:
                         event = Event()
                         
                         # Set as whole day event
-                        event.add('dtstart', current_date, parameters={'VALUE': 'DATE'})
-                        event.add('dtend', current_date + timedelta(days=1), parameters={'VALUE': 'DATE'})
-                        
-                        # Add common properties
-                        event.add('transp', 'TRANSPARENT')
-                        event.add('x-microsoft-cdo-busystatus', 'OOF')
-                        event.add('x-microsoft-cdo-alldayevent', 'TRUE')
-                        event.add('organizer', f"{self.config['firstName']} {self.config['lastName']}")
-                        
-                        if current_date in self.holidays:
-                            holiday_desc = self.get_holiday_description(current_date)
-                            event.add('summary', f"{holiday_desc} - {self.config['firstName']} {self.config['lastName']}")
-                            event.add('description', f"{holiday_desc} - Out of Office - {self.config['firstName']} {self.config['lastName']}")
-                            event.add('status', 'CONFIRMED')
-                            event.add('class', 'PUBLIC')
-                        elif self.is_vacation(current_date):
-                            event.add('summary', f"Vacation - {self.config['firstName']} {self.config['lastName']}")
-                            event.add('description', f"Personal Vacation - Out of Office - {self.config['firstName']} {self.config['lastName' ]}")
-                            event.add('status', 'CONFIRMED')
-                            event.add('class', 'PRIVATE')
-                        elif current_date.weekday() >= 5:
-                            event.add('summary', f"Weekend - {self.config['firstName' ]} {self.config['lastName']}")
-                            event.add('description', f"Weekend - Out of Office - {self.config['firstName' ]} {self.config['lastName' ]}")
-                            event.add('status', 'CONFIRMED')
-                            event.add('class', 'PUBLIC')
-                        else:
-                            continue
-
-                        # Add to calendar
-                        cal.add_component(event)
-
-        with open(filename, 'wb') as f:
-            f.write(cal.to_ical())
-
-def main():
-    
-    planer = VacationPlaner()
-    planer.initialize()
-    # Create ICS file
-    planer.create_ics()
-    # Create visualization
-    planer.create_calendar_visualization() # Call the method on the instance
-
-if __name__ == "__main__":
-    main()
+                        event.add('dtstart', current_date, parameters={'VALUE': 'DA

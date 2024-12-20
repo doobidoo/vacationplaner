@@ -1,0 +1,50 @@
+{
+    "firstName": "foo",
+    "lastName": "bar",
+    "year": 2025,
+    "region": "ferien_sankt-gallen_alle-schulen_2025",
+    "vacationBlocks": [
+        {
+            "description": "Neujahrsblock",
+            "start": "2025-01-02",
+            "end": "2025-01-03"
+        },
+        {
+            "description": "Osterblock",
+            "start": "2025-04-14",
+            "end": "2025-04-17"
+        },
+        {
+            "description": "Mai-Brücke",
+            "start": "2025-05-02",
+            "end": "2025-05-02"
+        },
+        {
+            "description": "Auffahrtsbrücke",
+            "start": "2025-05-30",
+            "end": "2025-05-30"
+        },
+        {
+            "description": "Sommerblock 1",
+            "start": "2025-07-28",
+            "end": "2025-07-31"
+        },
+        {
+            "description": "Sommerblock 2",
+            "start": "2025-08-04",
+            "end": "2025-08-08"
+        },
+        {
+            "description": "Herbstblock",
+            "start": "2025-10-06",
+            "end": "2025-10-10"
+        },
+        {
+            "description": "Weihnachtsblock 1",
+            "start": "2025-12-22",
+            "end": "2025-12-24"
+        },
+        {
+            "description": "Weihnachtsblock 2",
+            "start": "2025-12-29",
+            "end": "2025-12
