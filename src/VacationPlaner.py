@@ -1,3 +1,4 @@
+import os
 import calendar
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,7 +8,8 @@ import json
 import glob
 from typing import Dict, List, Tuple
 
-class HolidayPlanner:
+print("Current Working Directory:", os.getcwd())
+class VacationPlaner:
     def __init__(self):
         self.config = None
         self.holidays_config = None
@@ -20,11 +22,27 @@ class HolidayPlanner:
             "weekend": "#C1D4FF",
             "weekday": "#FFFFFF"
         }
+        self.conf_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "conf"))
+        self.vacationplans_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "vacationplans"))
+
+
+    def check(self):
+        print("Current Working Directory:", os.getcwd())
+        print("Conf path:", self.conf_path)
+        print("Vacation plans path:", self.vacationplans_path)
+        print("Holiday config:", self.holidays_config)
+        print("Vacation config:", self.config)
+        print("Holidays:", self.holidays)
+        print("Vacation blocks:", self.vacation_blocks)
+        print("Colors:", self.colors)
+        print("Year:", self.year)
 
     def load_holiday_config(self, region: str = None, year: str = None) -> Dict:
+        print("load_holiday_config===========================================")
+        #self.check()
+
         """Load holiday configuration file"""
-        holiday_files = glob.glob("holidays-*.json")
-        
+        holiday_files = glob.glob(os.path.join(self.conf_path, "holidays-*.json"))
         if not holiday_files:
             print("No holiday configuration files found!")
             return None
@@ -53,7 +71,10 @@ class HolidayPlanner:
 
     def load_vacation_config(self) -> Dict:
         """Load vacation configuration file"""
-        config_files = glob.glob("vacation-planner-*.json")
+        print("load_vacation_config===========================================")
+        #self.check()
+        config_files = glob.glob(os.path.join(self.conf_path, "vacation-*.json"))
+        print(config_files)
         
         if not config_files:
             print("No vacation configuration files found!")
@@ -79,7 +100,7 @@ class HolidayPlanner:
         return datetime.strptime(date_str, "%Y-%m-%d").date()
 
     def initialize(self):
-        """Initialize the planner with configurations"""
+        """Initialize the planer with configurations"""
         # Load vacation config first
         self.config = self.load_vacation_config()
         if not self.config:
@@ -181,74 +202,78 @@ class HolidayPlanner:
         ]
         fig.legend(handles=legend_elements, loc='lower center', ncol=3, fontsize=10, frameon=False)
         plt.tight_layout(rect=[0, 0.05, 1, 0.95]) # Adjust layout to prevent legend overlap
-        plt.savefig(f"vacation_{self.year}_{self.config['firstName']}_{self.config['lastName']}.png", dpi=300) #Save the figure
+        pngfilename = f"vacation_{self.year}_{self.config['firstName']}_{self.config['lastName']}.png" #Save the figure
+        plt.savefig(os.path.join(self.vacationplans_path, pngfilename), dpi=300)
+        #plt.savefig(f"vacation_{self.year}_{self.config['firstName']}_{self.config['lastName']}.png", dpi=300) #Save the figure
 
         # Create the calendar files
-        plt.savefig(f"vacation_{self.year}_{self.config['firstName']}_{self.config['lastName']}.pdf", 
+        calendarfilename = f"vacation_{self.year}_{self.config['firstName']}_{self.config['lastName']}.pdf"
+        filename = os.path.join(self.vacationplans_path, calendarfilename)
+        #plt.savefig(f"vacation_{self.year}_{self.config['firstName']}_{self.config['lastName']}.pdf", 
+        plt.savefig(filename, 
                     bbox_inches='tight', 
                     orientation='landscape')
         plt.show()
 
-def create_ics(planner):
-    """Create the ICS file"""
-    filename = f"vacation_{planner.year}_{planner.config['firstName']}_{planner.config['lastName']}.ics"
-    
-    cal = Calendar()
-    cal.add('prodid', '-//My Calendar//EN')
-    cal.add('version', '2.0')
+    def create_ics(self):
+        """Create the ICS file"""
+        icsfilename = f"vacation_{self.year}_{self.config['firstName']}_{self.config['lastName']}.ics"
+        filename = os.path.join(self.vacationplans_path, icsfilename)
+        cal = Calendar()
+        cal.add('prodid', '-//My Calendar//EN')
+        cal.add('version', '2.0')
 
-    for month in range(1, 13):
-        month_cal = calendar.Calendar().monthdayscalendar(planner.year, month)
-        for week in month_cal:
-            for day in week:
-                if day != 0:
-                    current_date = date(planner.year, month, day)
-                    event = Event()
-                    
-                    # Set as whole day event
-                    event.add('dtstart', current_date, parameters={'VALUE': 'DATE'})
-                    event.add('dtend', current_date + timedelta(days=1), parameters={'VALUE': 'DATE'})
-                    
-                    # Add common properties
-                    event.add('transp', 'TRANSPARENT')
-                    event.add('x-microsoft-cdo-busystatus', 'OOF')
-                    event.add('x-microsoft-cdo-alldayevent', 'TRUE')
-                    event.add('organizer', f"{planner.config['firstName']} {planner.config['lastName']}")
-                    
-                    if current_date in planner.holidays:
-                        holiday_desc = planner.get_holiday_description(current_date)
-                        event.add('summary', f"{holiday_desc} - {planner.config['firstName']} {planner.config['lastName']}")
-                        event.add('description', f"{holiday_desc} - Out of Office - {planner.config['firstName']} {planner.config['lastName']}")
-                        event.add('status', 'CONFIRMED')
-                        event.add('class', 'PUBLIC')
-                    elif planner.is_vacation(current_date):
-                        event.add('summary', f"Vacation - {planner.config['firstName']} {planner.config['lastName']}")
-                        event.add('description', f"Personal Vacation - Out of Office - {planner.config['firstName']} {planner.config['lastName' ]}")
-                        event.add('status', 'CONFIRMED')
-                        event.add('class', 'PRIVATE')
-                    elif current_date.weekday() >= 5:
-                        event.add('summary', f"Weekend - {planner.config['firstName' ]} {planner.config['lastName']}")
-                        event.add('description', f"Weekend - Out of Office - {planner.config['firstName' ]} {planner.config['lastName' ]}")
-                        event.add('status', 'CONFIRMED')
-                        event.add('class', 'PUBLIC')
-                    else:
-                        continue
+        for month in range(1, 13):
+            month_cal = calendar.Calendar().monthdayscalendar(self.year, month)
+            for week in month_cal:
+                for day in week:
+                    if day != 0:
+                        current_date = date(self.year, month, day)
+                        event = Event()
+                        
+                        # Set as whole day event
+                        event.add('dtstart', current_date, parameters={'VALUE': 'DATE'})
+                        event.add('dtend', current_date + timedelta(days=1), parameters={'VALUE': 'DATE'})
+                        
+                        # Add common properties
+                        event.add('transp', 'TRANSPARENT')
+                        event.add('x-microsoft-cdo-busystatus', 'OOF')
+                        event.add('x-microsoft-cdo-alldayevent', 'TRUE')
+                        event.add('organizer', f"{self.config['firstName']} {self.config['lastName']}")
+                        
+                        if current_date in self.holidays:
+                            holiday_desc = self.get_holiday_description(current_date)
+                            event.add('summary', f"{holiday_desc} - {self.config['firstName']} {self.config['lastName']}")
+                            event.add('description', f"{holiday_desc} - Out of Office - {self.config['firstName']} {self.config['lastName']}")
+                            event.add('status', 'CONFIRMED')
+                            event.add('class', 'PUBLIC')
+                        elif self.is_vacation(current_date):
+                            event.add('summary', f"Vacation - {self.config['firstName']} {self.config['lastName']}")
+                            event.add('description', f"Personal Vacation - Out of Office - {self.config['firstName']} {self.config['lastName' ]}")
+                            event.add('status', 'CONFIRMED')
+                            event.add('class', 'PRIVATE')
+                        elif current_date.weekday() >= 5:
+                            event.add('summary', f"Weekend - {self.config['firstName' ]} {self.config['lastName']}")
+                            event.add('description', f"Weekend - Out of Office - {self.config['firstName' ]} {self.config['lastName' ]}")
+                            event.add('status', 'CONFIRMED')
+                            event.add('class', 'PUBLIC')
+                        else:
+                            continue
 
-                    # Add to calendar
-                    cal.add_component(event)
+                        # Add to calendar
+                        cal.add_component(event)
 
-    with open(filename, 'wb') as f:
-        f.write(cal.to_ical())
+        with open(filename, 'wb') as f:
+            f.write(cal.to_ical())
 
 def main():
-    planner = HolidayPlanner()
-    planner.initialize()
-
-    # Create visualization
-    planner.create_calendar_visualization() # Call the method on the instance
-
+    
+    planer = VacationPlaner()
+    planer.initialize()
     # Create ICS file
-    create_ics(planner)
+    planer.create_ics()
+    # Create visualization
+    planer.create_calendar_visualization() # Call the method on the instance
 
 if __name__ == "__main__":
     main()
