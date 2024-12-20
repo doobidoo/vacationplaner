@@ -2,7 +2,7 @@
     "firstName": "John",
     "lastName": "Doe",
     "year": 2025,
-    "region": "Region Name",
+    "region": "Kanton Thurgau",
     "vacationBlocks": [
         {
             "description": "Neujahrsblock",

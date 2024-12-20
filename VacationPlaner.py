@@ -127,7 +127,7 @@ class HolidayPlanner:
         months = range(1, 13)
         fig, axes = plt.subplots(4, 3, figsize=(11.7, 8.3))
         fig.suptitle(
-            f"Ferienplanung {self.year} - {self.config['region']}\n"
+            f"vacationplan {self.year} - {self.config['region']}\n"
             f"{self.config['firstName']} {self.config['lastName']}",
             fontsize=14, y=0.98
         )
@@ -181,17 +181,17 @@ class HolidayPlanner:
         ]
         fig.legend(handles=legend_elements, loc='lower center', ncol=3, fontsize=10, frameon=False)
         plt.tight_layout(rect=[0, 0.05, 1, 0.95]) # Adjust layout to prevent legend overlap
-        plt.savefig(f"ferien_{self.year}_{self.config['firstName']}_{self.config['lastName']}.png", dpi=300) #Save the figure
+        plt.savefig(f"vacation_{self.year}_{self.config['firstName']}_{self.config['lastName']}.png", dpi=300) #Save the figure
 
         # Create the calendar files
-        plt.savefig(f"ferien_{self.year}_{self.config['firstName']}_{self.config['lastName']}.pdf", 
+        plt.savefig(f"vacation_{self.year}_{self.config['firstName']}_{self.config['lastName']}.pdf", 
                     bbox_inches='tight', 
                     orientation='landscape')
         plt.show()
 
 def create_ics(planner):
     """Create the ICS file"""
-    filename = f"ferien_{planner.year}_{planner.config['firstName']}_{planner.config['lastName']}.ics"
+    filename = f"vacation_{planner.year}_{planner.config['firstName']}_{planner.config['lastName']}.ics"
     
     cal = Calendar()
     cal.add('prodid', '-//My Calendar//EN')

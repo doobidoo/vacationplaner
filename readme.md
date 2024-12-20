@@ -96,7 +96,7 @@ To modify the ICS file:
 1. Configure your holidays in a JSON file following the structure of holidays-thurgau-2025.json
 2. Run HolidayPlaner.py:
    ```bash
-   python HolidayPlaner.py
+   python VacationPlaner.py
    ```
 3. Select the appropriate configuration files when prompted
 4. The script will generate:
