@@ -1,7 +1,8 @@
 import calendar
 import matplotlib.pyplot as plt
 import numpy as np
-from datetime import date
+from datetime import date, datetime, timedelta
+from icalendar import Calendar, Event
 
 # Define holidays and vacation blocks
 holidays = [
@@ -11,14 +12,17 @@ holidays = [
 ]
 
 vacation_blocks = [
-    (date(2025, 1, 3), date(2025, 1, 5)),  # Jan block
-    (date(2025, 4, 22), date(2025, 4, 27)),  # April block
-    (date(2025, 5, 30), date(2025, 6, 15)),  # May/June block
-    (date(2025, 7, 28), date(2025, 8, 3)),  # July/August block
-    (date(2025, 12, 22), date(2025, 12, 28)),  # December block 1
-    (date(2025, 12, 29), date(2025, 12, 31))  # December block 2
+    (date(2025, 1, 2), date(2025, 1, 3)),    # Neujahrsblock
+    (date(2025, 4, 14), date(2025, 4, 17)),   # Osterblock
+    (date(2025, 5, 2), date(2025, 5, 2)),     # Mai-Brücke
+    (date(2025, 5, 30), date(2025, 5, 30)),   # Auffahrtsbrücke
+    (date(2025, 6, 26), date(2025, 6, 27)),   # Geburtstag
+    (date(2025, 7, 28), date(2025, 7, 31)),   # Sommerblock 1
+    (date(2025, 8, 4), date(2025, 8, 8)),     # Sommerblock 2
+    (date(2025, 10, 6), date(2025, 10, 10)),  # Herbstblock
+    (date(2025, 12, 22), date(2025, 12, 24)), # Weihnachtsblock 1
+    (date(2025, 12, 29), date(2025, 12, 31))  # Weihnachtsblock 2
 ]
-
 # Colors for different types of days
 colors = {
     "holiday": "#FFDDC1",   # Light orange for holidays
@@ -94,3 +98,35 @@ fig.legend(handles=legend_elements, loc='lower center', ncol=3, fontsize=10, fra
 
 plt.tight_layout(rect=[0, 0.08, 1, 0.95])  # Adjust layout to include the legend
 plt.show()
+
+def create_ics(year, filename="calendar.ics"):
+    cal = Calendar()
+    cal.add('prodid', '-//My Calendar//EN')
+    cal.add('version', '2.0')
+
+    for month in range(1, 13):
+        month_cal = calendar.Calendar().monthdayscalendar(year, month)
+        for week in month_cal:
+            for day in week:
+                if day != 0:
+                    current_date = date(year, month, day)
+                    event = Event()
+                    event.add('dtstart', current_date)
+                    event.add('dtend', current_date + timedelta(days=1))  # End date is exclusive
+                    if current_date in holidays:
+                        event.add('summary', 'Holiday')
+                        event.add('description', 'Public Holiday')
+                    elif is_vacation(current_date):
+                        event.add('summary', 'Vacation')
+                        event.add('description', 'Personal Vacation')
+                    elif current_date.weekday() >= 5:
+                        event.add('summary', 'Weekend')
+                        event.add('description', 'Weekend')
+                    else:
+                        continue #Skip regular weekdays to avoid cluttering the calendar
+                    cal.add_component(event)
+
+    with open(filename, 'wb') as f:
+        f.write(cal.to_ical())
+    
+create_ics(year, "ferien_2025.ics") #Creates the ics file for the year 2025
