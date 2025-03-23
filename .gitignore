@@ -1,0 +1,20 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Output files (if you don't want to commit them)
+vacationplans/*.png
+vacationplans/*.pdf
+vacationplans/*.ics
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+.DS_Store
