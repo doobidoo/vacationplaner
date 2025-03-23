@@ -1,0 +1,28 @@
+{
+    "firstName": "Your",
+    "lastName": "Name",
+    "year": 2025,
+    "region": "Your Region",
+    "vacationBlocks": [
+        {
+            "description": "New Year's Break",
+            "start": "2025-01-02",
+            "end": "2025-01-03"
+        },
+        {
+            "description": "Spring Break",
+            "start": "2025-03-28",
+            "end": "2025-04-04"
+        },
+        {
+            "description": "Summer Vacation",
+            "start": "2025-07-21",
+            "end": "2025-08-08"
+        },
+        {
+            "description": "Christmas Break",
+            "start": "2025-12-22",
+            "end": "2025-12-31"
+        }
+    ]
+}

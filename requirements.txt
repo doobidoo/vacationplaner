@@ -1,3 +1,20 @@
-matplotlib
-numpy
-icalendar
+--index-url https://pypi.org/simple
+
+# Core dependencies
+matplotlib>=3.7.0
+numpy>=1.24.0
+icalendar>=5.0.0
+
+# matplotlib dependencies
+packaging
+Pillow
+pyparsing
+cycler
+python-dateutil
+kiwisolver
+six
+tzdata
+fontTools
+
+# Additional dependencies for error handling and logging
+argparse
