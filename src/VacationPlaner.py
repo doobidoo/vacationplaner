@@ -4,7 +4,6 @@ VacationPlaner - A tool for managing and visualizing holidays and vacation days.
 
 This is the main entry point for the VacationPlaner application.
 """
-
 import sys
 import os
 import logging

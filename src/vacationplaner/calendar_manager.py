@@ -4,8 +4,8 @@ Handles calendar data, date parsing, and date logic.
 """
 
 import calendar
-from datetime import date, datetime
-from typing import Dict, List, Tuple, Union, Optional
+from datetime import date, datetime, timedelta
+from typing import Dict, List, Tuple, Union, Optional, Set
 import logging
 
 # Configure logging
@@ -74,19 +74,20 @@ class CalendarManager:
                 logger.warning(f"Skipping holiday with invalid date: {e}")
         return holidays
     
-    def _parse_vacation_blocks(self) -> List[Tuple[date, date]]:
+    def _parse_vacation_blocks(self) -> List[Tuple[date, date, str, int]]:
         """
         Parse vacation blocks from configuration.
         
         Returns:
-            List of (start_date, end_date) tuples.
+            List of (start_date, end_date, description, block_id) tuples.
         """
         blocks = []
-        for block in self.vacation_config['vacationBlocks']:
+        for i, block in enumerate(self.vacation_config['vacationBlocks']):
             try:
                 start_date = self._parse_date(block['start'])
                 end_date = self._parse_date(block['end'])
-                blocks.append((start_date, end_date))
+                description = block['description']
+                blocks.append((start_date, end_date, description, i))
             except ValueError as e:
                 logger.warning(f"Skipping vacation block with invalid date: {e}")
         return blocks
@@ -103,6 +104,21 @@ class CalendarManager:
         """
         return day in self.holidays
     
+    def get_vacation_block_id(self, day: date) -> Optional[int]:
+        """
+        Get the vacation block ID for a given day.
+        
+        Args:
+            day: Date to check.
+            
+        Returns:
+            Vacation block ID or None if the day is not in a vacation block.
+        """
+        for start, end, _, block_id in self.vacation_blocks:
+            if start <= day <= end:
+                return block_id
+        return None
+    
     def is_vacation(self, day: date) -> bool:
         """
         Check if a given day is a vacation day.
@@ -113,10 +129,7 @@ class CalendarManager:
         Returns:
             True if the day is a vacation day, False otherwise.
         """
-        for start, end in self.vacation_blocks:
-            if start <= day <= end:
-                return True
-        return False
+        return self.get_vacation_block_id(day) is not None
     
     def is_weekend(self, day: date) -> bool:
         """
@@ -159,14 +172,9 @@ class CalendarManager:
         Returns:
             Vacation description or None if the day is not a vacation day.
         """
-        for block in self.vacation_config['vacationBlocks']:
-            try:
-                start_date = self._parse_date(block['start'])
-                end_date = self._parse_date(block['end'])
-                if start_date <= day <= end_date:
-                    return block['description']
-            except ValueError:
-                continue
+        for start, end, description, _ in self.vacation_blocks:
+            if start <= day <= end:
+                return description
         return None
     
     def get_monthly_calendar(self, month: int) -> List[List[int]]:
@@ -201,32 +209,118 @@ class CalendarManager:
             return {
                 'type': 'outside',
                 'display': '',
-                'description': None
+                'description': None,
+                'vacation_block': None
             }
         
         current_date = date(year, month, day)
+        vacation_block = self.get_vacation_block_id(current_date)
         
+        # Determine the day type with weekend having priority over vacation for coloring
         if self.is_holiday(current_date):
-            return {
-                'type': 'holiday',
-                'display': str(day),
-                'description': self.get_holiday_description(current_date)
-            }
-        elif self.is_vacation(current_date):
-            return {
-                'type': 'vacation',
-                'display': str(day),
-                'description': self.get_vacation_description(current_date)
-            }
+            day_type = 'holiday'
         elif self.is_weekend(current_date):
-            return {
-                'type': 'weekend',
-                'display': str(day),
-                'description': None
-            }
+            day_type = 'weekend'
+        elif self.is_vacation(current_date):
+            day_type = 'vacation'
         else:
-            return {
-                'type': 'weekday',
-                'display': str(day),
-                'description': None
-            }
+            day_type = 'weekday'
+        
+        return {
+            'type': day_type,
+            'display': str(day),
+            'description': self.get_holiday_description(current_date) if day_type == 'holiday' else self.get_vacation_description(current_date) if day_type == 'vacation' else None,
+            'vacation_block': vacation_block
+        }
+    
+    def calculate_statistics(self) -> Dict:
+        """
+        Calculate calendar statistics.
+        
+        Returns:
+            Dictionary with calendar statistics.
+        """
+        # Initialize counters
+        total_days = 0
+        workdays = 0
+        weekends = 0
+        holidays = 0
+        vacation_days = 0
+        vacation_workdays = 0  # Vacation days that are also workdays
+        
+        # Start date of the year
+        start_date = date(self.year, 1, 1)
+        
+        # End date of the year
+        end_date = date(self.year, 12, 31)
+        
+        # Track days in vacation blocks
+        vacation_block_days = set()
+        for start, end, _, _ in self.vacation_blocks:
+            current_date = start
+            while current_date <= end:
+                vacation_block_days.add(current_date)
+                current_date += timedelta(days=1)
+        
+        # Calculate statistics
+        current_date = start_date
+        while current_date <= end_date:
+            total_days += 1
+            
+            # Check if it's a holiday
+            if current_date in self.holidays:
+                holidays += 1
+            
+            # Check if it's a weekend
+            if self.is_weekend(current_date):
+                weekends += 1
+            else:
+                workdays += 1
+                
+                # Check if it's a vacation workday
+                if current_date in vacation_block_days:
+                    vacation_workdays += 1
+            
+            # Check if it's a vacation day (including weekends)
+            if current_date in vacation_block_days:
+                vacation_days += 1
+            
+            current_date += timedelta(days=1)
+        
+        # Calculate days off and days at work
+        days_off = weekends + holidays + vacation_workdays
+        days_at_work = workdays - vacation_workdays
+        
+        # Calculate individual vacation block statistics
+        vacation_blocks_stats = []
+        for i, (start, end, description, block_id) in enumerate(self.vacation_blocks):
+            block_days = 0
+            block_workdays = 0
+            current_date = start
+            
+            while current_date <= end:
+                block_days += 1
+                if not self.is_weekend(current_date) and current_date not in self.holidays:
+                    block_workdays += 1
+                current_date += timedelta(days=1)
+            
+            vacation_blocks_stats.append({
+                'id': block_id,
+                'description': description,
+                'start': start.strftime('%Y-%m-%d'),
+                'end': end.strftime('%Y-%m-%d'),
+                'total_days': block_days,
+                'workdays': block_workdays
+            })
+        
+        return {
+            'total_days': total_days,
+            'workdays': workdays,
+            'weekends': weekends,
+            'holidays': holidays,
+            'vacation_days': vacation_days,
+            'vacation_workdays': vacation_workdays,
+            'days_off': days_off,
+            'days_at_work': days_at_work,
+            'vacation_blocks': vacation_blocks_stats
+        }
